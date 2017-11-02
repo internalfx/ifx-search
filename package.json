@@ -1,0 +1,24 @@
+{
+  "name": "ifx-search",
+  "description": "Ngram text search for node and the browser.",
+  "version": "0.0.0",
+  "homepage": "https://github.com/internalfx/ifx-search",
+  "author": {
+    "name": "Bryan Morris",
+    "email": "bryan@internalfx.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/internalfx/ifx-search.git"
+  },
+  "bugs": {
+    "url": "https://github.com/internalfx/ifx-search/issues"
+  },
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests\""
+  },
+  "dependencies": {
+  }
+}
