@@ -1,7 +1,7 @@
 {
   "name": "ifx-search",
   "description": "Ngram text search for node and the browser.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/internalfx/ifx-search",
   "author": {
     "name": "Bryan Morris",
@@ -20,5 +20,6 @@
     "test": "echo \"No tests\""
   },
   "dependencies": {
+    "lodash": "^4.17.4"
   }
 }
