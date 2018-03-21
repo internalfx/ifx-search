@@ -56,7 +56,7 @@ let Search = function () {
     return store.set(id, record)
   }
 
-  let remove = function (id) {
+  let unset = function (id) {
     if (id == null) { throw new Error('Id is required') }
 
     return store.delete(id)
@@ -79,7 +79,7 @@ let Search = function () {
         relevance = ngramMatch(textNgrams, recordNgrams, minRelevance)
       }
 
-      if (relevance > minRelevance || results.length < limit) {
+      if (relevance > minRelevance || (results.length < limit && relevance > 0)) {
         let data = record.get('data')
         results.push({
           relevance,
@@ -103,7 +103,7 @@ let Search = function () {
 
   return Object.freeze({
     set,
-    remove,
+    unset,
     find
   })
 }
