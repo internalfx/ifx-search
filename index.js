@@ -67,21 +67,22 @@ let Search = function () {
     let results = []
     let minRelevance = 0
 
-    for (let record of store.values()) {
+    for (let [id, record] of store.entries()) {
       let recordNgrams = record.get('ngrams')
       let relevance
 
-      if (text === record.get('text')) {               // Check for exact match
+      if (text === record.get('text')) { // Check for exact match
         relevance = 100
-      } else if (record.get('text').includes(text)) {  // Check for patial match
+      } else if (record.get('text').includes(text)) { // Check for patial match
         relevance = (text.length / record.get('text').length) * 100
-      } else {                                         // Check for fuzzy match
+      } else { // Check for fuzzy match
         relevance = ngramMatch(textNgrams, recordNgrams, minRelevance)
       }
 
       if (relevance > minRelevance || (results.length < limit && relevance > 0)) {
         let data = record.get('data')
         results.push({
+          id,
           relevance,
           data
         })
