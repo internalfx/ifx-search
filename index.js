@@ -3,8 +3,8 @@ let _ = require('lodash')
 
 let buildMap = function (obj) {
   let map = new Map()
-  for (let key of Object.keys(obj)) {
-    map.set(key, obj[key])
+  for (let [key, val] of Object.entries(obj)) {
+    map.set(key, val)
   }
   return map
 }
