@@ -19,7 +19,7 @@ let ngrams = function (text) {
   return pieces
 }
 
-let ngramMatch = function (ngrams1, ngrams2, minRelevance) {
+let ngramMatch = function (ngrams1, ngrams2, minRelevance = 0) {
   let hitCount = 0
   let union = ngrams1.length + ngrams2.length
   let gramValue = ((ngrams1.length - 1) / ngrams1.length) * 100
