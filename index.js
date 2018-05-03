@@ -1,21 +1,21 @@
 
 let _ = require('lodash')
 
-let buildMap = function (obj) {
-  let map = new Map()
-  for (let [key, val] of Object.entries(obj)) {
-    map.set(key, val)
-  }
-  return map
+let defaultField = {
+  type: 'ngram',
+  boost: 1
 }
 
 let ngrams = function (text) {
   let pieces = []
 
-  text = text.toLowerCase().replace(/[^a-zA-Z0-9%@!$#?]+/g, '')
-  for (let i = 0; i < text.length - 2; i += 1) {
-    pieces.push(text.slice(i, i + 3))
+  if (_.isString(text)) {
+    text = text.toLowerCase().replace(/[^a-zA-Z0-9%@!$#?]+/g, '')
+    for (let i = 0; i < text.length - 2; i += 1) {
+      pieces.push(text.slice(i, i + 3))
+    }
   }
+
   return pieces
 }
 
@@ -41,19 +41,30 @@ let ngramMatch = function (ngrams1, ngrams2, minRelevance = 0) {
   return 0.0
 }
 
-let Search = function () {
+let Search = function (spec) {
   let store = new Map()
 
-  let set = function (id, text = '', data = {}) {
+  if (!_.isObject(spec)) { throw new Error('Spec must be an Object!') }
+
+  for (let key of Object.keys(spec)) {
+    spec[key] = {...defaultField, ...spec[key]}
+  }
+
+  let set = function (id, data = {}) {
     if (id == null) { throw new Error('Id is required') }
 
-    let record = buildMap({
-      data: data,
-      text: text,
-      ngrams: ngrams(text)
-    })
+    let index = {}
 
-    return store.set(id, record)
+    for (let [key, config] of Object.entries(spec)) {
+      if (config.type === 'ngram') {
+        index[key] = ngrams(data[key])
+      }
+    }
+
+    return store.set(id, {
+      data,
+      index
+    })
   }
 
   let unset = function (id) {
@@ -62,25 +73,36 @@ let Search = function () {
     return store.delete(id)
   }
 
-  let find = function (text, limit) {
-    let textNgrams = ngrams(text)
+  let find = function (query, limit) {
+    let queryNgrams = ngrams(query)
     let results = []
-    let minRelevance = 0
 
     for (let [id, record] of store.entries()) {
-      let recordNgrams = record.get('ngrams')
-      let relevance
+      let relevance = 0
 
-      if (text === record.get('text')) { // Check for exact match
-        relevance = 100
-      } else if (record.get('text').includes(text)) { // Check for patial match
-        relevance = (text.length / record.get('text').length) * 100
-      } else { // Check for fuzzy match
-        relevance = ngramMatch(textNgrams, recordNgrams, minRelevance)
+      for (let [fieldName, fieldConfig] of Object.entries(spec)) {
+        let fieldRelevance = 0
+        let fieldValue = record.data[fieldName]
+
+        if (fieldConfig.type === 'ngram') {
+          let fieldNgrams = record.index[fieldName]
+
+          if (query === fieldValue) { // Check for exact match
+            fieldRelevance = 100
+          } else if (fieldValue.includes(query)) { // Check for patial match
+            fieldRelevance = (query.length / fieldValue.length) * 100
+          } else { // Check for fuzzy match
+            fieldRelevance = ngramMatch(queryNgrams, fieldNgrams)
+          }
+        }
+
+        fieldRelevance = fieldRelevance * fieldConfig.boost
+
+        relevance += fieldRelevance
       }
 
-      if (relevance > minRelevance || (results.length < limit && relevance > 0)) {
-        let data = record.get('data')
+      if (results.length < limit && relevance > 0) {
+        let data = record.data
         results.push({
           id,
           relevance,
@@ -92,8 +114,6 @@ let Search = function () {
         if (results.length > limit) {
           results.shift()
         }
-
-        minRelevance = results[0].relevance
       }
     }
 
