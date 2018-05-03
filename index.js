@@ -104,7 +104,7 @@ let Search = function (spec) {
         relevance += fieldRelevance
       }
 
-      if (results.length < limit && relevance > 0) {
+      if (results.length < limit || relevance > 0) {
         let data = record.data
         results.push({
           id,
