@@ -56,6 +56,9 @@ let Search = function (spec) {
     let index = {}
 
     for (let [key, config] of Object.entries(spec)) {
+      if (data[key] == null) {
+        data[key] = ''
+      }
       if (config.type === 'ngram') {
         index[key] = ngrams(data[key])
       }
